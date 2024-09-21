@@ -69,4 +69,11 @@ mod tests {
         // Optional: Check the values of the normalized vector
         assert_eq!(normalized.data, vec![0.6, 0.8]); // Expected normalized values for [3, 4]
     }
+
+    #[test]
+    fn test_vector_min_max() {
+        let vec = Vector::from(vec![1.0, 3.0, 3.1]);
+        assert_eq!(vec.min().unwrap(), 1.0);
+        assert_eq!(vec.max().unwrap(), 3.1);
+    }
 }

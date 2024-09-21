@@ -1,10 +1,25 @@
-use std::ops::{Add, AddAssign, Div, DivAssign, Mul, MulAssign, Sub, SubAssign};
+use std::ops::{Add, AddAssign, Div, DivAssign, Index, IndexMut, Mul, MulAssign, Sub, SubAssign};
 
+#[derive(Clone)]
 pub struct Vector<T = f64> {
   pub data: Vec<T>
 }
 
+impl<T> From<Vec<T>> for Vector<T> {
+  fn from(data: Vec<T>) -> Self {
+    Self {
+      data
+    }
+  }
+}
+
 impl<T> Vector<T> {
+  pub fn new() -> Self {
+    Self {
+      data: vec![]
+    }
+  }
+
   pub fn len(&self) -> usize {
     self.data.len()
   }
@@ -13,8 +28,88 @@ impl<T> Vector<T> {
     self.data.is_empty()
   }
 
+  pub fn equals(&self, other: &Self) -> bool
+  where
+    T: PartialEq
+  {
+    self.data == other.data
+  }
+
   pub fn get(&self, index: usize) -> Option<&T> {
     self.data.get(index)
+  }
+
+  pub fn iter(&self) -> std::slice::Iter<'_, T> {
+    self.data.iter()
+  }
+
+  pub fn iter_mut(&mut self) -> std::slice::IterMut<'_, T> {
+    self.data.iter_mut()
+  }
+
+  pub fn to_string(&self) -> String
+  where
+    T: std::fmt::Display
+  {
+    format!("[{}]", self.iter().map(|x| format!("{}", x)).collect::<Vec<_>>().join(", "))
+  }
+
+  pub fn element_wise_apply<F>(&self, f: F) -> Self
+  where
+    F: Fn(T) -> T,
+    T: Copy
+  {
+    let data: Vec<_> = self.data.iter().map(|x| f(*x)).collect();
+    Self {
+      data
+    }
+  }
+
+  pub fn sum(&self) -> T
+  where
+    T: Add<Output = T> + Default + Clone
+  {
+    self.data.iter().cloned().fold(T::default(), |acc, x| acc + x)
+  }
+
+  pub fn mean(&self) -> Option<f64>
+  where
+    T: Add<Output = T> + Copy + Default + Into<f64>
+  {
+    if self.is_empty() {
+      None
+    } else {
+      Some(self.sum().into() / self.len() as f64)
+    }
+  }
+
+  pub fn max(&self) -> Option<T>
+  where
+    T: PartialOrd + Copy
+  {
+    self.data.iter().max_by(|a, b| a.partial_cmp(b).unwrap()).cloned()
+  }
+
+  pub fn min(&self) -> Option<T>
+  where
+    T: PartialOrd + Copy
+  {
+    self.data.iter().min_by(|a, b| a.partial_cmp(b).unwrap()).cloned()
+  }
+
+  pub fn to_array<const N: usize>(&self) -> Option<[T; N]>
+  where
+    T: Default + Copy
+  {
+    if self.len() == N {
+      let mut arr = [T::default(); N];
+      for (i, &item) in self.iter().enumerate() {
+        arr[i] = item;
+      }
+      Some(arr)
+    } else {
+      None
+    }
   }
 }
 
@@ -203,5 +298,19 @@ where
         data: vec![T::default(); self.len()]
       }
     }
+  }
+}
+
+impl<T> Index<usize> for Vector<T> {
+  type Output = T;
+
+  fn index(&self, index: usize) -> &Self::Output {
+    &self.data[index]
+  }
+}
+
+impl<T> IndexMut<usize> for Vector<T> {
+  fn index_mut(&mut self, index: usize) -> &mut Self::Output {
+    &mut self.data[index]
   }
 }
