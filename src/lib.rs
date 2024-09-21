@@ -51,4 +51,22 @@ mod tests {
         let v = Vector { data: vec![1.0] };
         assert_eq!(v.len(), 1);
     }
+
+    #[test]
+    fn test_vector_normalize() {
+        let vector = Vector { data: vec![3.0, 4.0] }; // A 2D vector
+        let normalized = vector.normalize();
+        
+        // Expected length of the vector [3, 4] is 5
+        let expected_length = 1.0; // Length of normalized vector should be 1.0
+        
+        // Calculate length of normalized vector
+        let norm_length = normalized.dot(&normalized).sqrt();
+        
+        // Assert that the normalized vector has length 1
+        assert!((norm_length - expected_length).abs() < f64::EPSILON, "Normalized vector length is not 1");
+        
+        // Optional: Check the values of the normalized vector
+        assert_eq!(normalized.data, vec![0.6, 0.8]); // Expected normalized values for [3, 4]
+    }
 }

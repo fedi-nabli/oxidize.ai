@@ -12,6 +12,10 @@ impl<T> Vector<T> {
   pub fn is_empty(&self) -> bool {
     self.data.is_empty()
   }
+
+  pub fn get(&self, index: usize) -> Option<&T> {
+    self.data.get(index)
+  }
 }
 
 impl<T> Add for Vector<T>
@@ -21,7 +25,7 @@ where
   type Output = Self;
 
   fn add(self, rhs: Self) -> Self::Output {
-    let data: Vec<T> = self
+    let data: Vec<_> = self
       .data
       .iter()
       .zip(rhs.data.iter())
@@ -52,7 +56,7 @@ where
   type Output = Self;
 
   fn sub(self, rhs: Self) -> Self::Output {
-    let data: Vec<T> = self
+    let data: Vec<_> = self
       .data
       .iter()
       .zip(rhs.data.iter())
@@ -83,7 +87,7 @@ where
   type Output = Self;
 
   fn mul(self, rhs: Self) -> Self::Output {
-    let data: Vec<T> = self
+    let data: Vec<_> = self
       .data
       .iter()
       .zip(rhs.data.iter())
@@ -114,7 +118,7 @@ where
   type Output = Self;
 
   fn div(self, rhs: Self) -> Self::Output {
-    let data: Vec<T> = self
+    let data: Vec<_> = self
       .data
       .iter()
       .zip(rhs.data.iter())
@@ -134,6 +138,70 @@ where
   fn div_assign(&mut self, rhs: Self) {
     for (a, b) in self.data.iter_mut().zip(rhs.data.iter()) {
       *a /= *b;
+    }
+  }
+}
+
+impl<T> Vector<T>
+where
+  T: Mul<Output = T> + Add<Output = T> + Default + Copy
+{
+  pub fn dot(&self, rhs: &Self) -> T {
+    self.data
+      .iter()
+      .zip(rhs.data.iter())
+      .map(|(a, b)| *a * *b)
+      .fold(T::default(), |acc, x| acc + x)
+  }
+}
+
+impl<T> Vector<T>
+where
+  T: Mul<Output = T> + Copy
+{
+  pub fn scalar_mul(&self, scalar: T) -> Self {
+    let data: Vec<_> = self
+      .data
+      .iter()
+      .map(|&x| x * scalar)
+      .collect();
+
+    Self {
+      data
+    }
+  }
+}
+
+impl<T> Vector<T>
+where
+  T: Div<Output = T> + Copy
+{
+  pub fn scalar_div(&self, scalar: T) -> Self {
+    let data: Vec<_> = self
+      .data
+      .iter()
+      .map(|&x| x / scalar)
+      .collect();
+
+    Self {
+      data
+    }
+  }
+}
+
+impl<T> Vector<T>
+where
+  T: Mul<Output = T> + Add<Output = T> + Copy + Default + PartialEq + From<f64> + Into<f64> + Div<Output = T>
+{
+  pub fn normalize(&self) -> Self {
+    let length: f64 = self.dot(self).into();
+    let length = length.sqrt();
+    if length > 0.0 {
+      self.scalar_div(T::from(length))
+    } else {
+      Self {
+        data: vec![T::default(); self.len()]
+      }
     }
   }
 }
