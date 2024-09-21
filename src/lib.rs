@@ -45,4 +45,10 @@ mod tests {
         v.data = vec![1];
         assert_eq!(v.is_empty(), false);
     }
+
+    #[test]
+    fn test_vector_len() {
+        let v = Vector { data: vec![1.0] };
+        assert_eq!(v.len(), 1);
+    }
 }
