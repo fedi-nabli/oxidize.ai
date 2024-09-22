@@ -82,7 +82,9 @@ mod tests {
         let mat: Matrix<f64> = Matrix::identity(3);
         let v = Vector { data: vec![1.0, 2.1, 3.5, 4.6] };
         let mat2: Matrix<f64> = Matrix::from_vec(2, 2, v.data).unwrap();
+        let mat3 = mat2.transpose();
         println!("{}", mat);
         println!("{}", mat2);
+        println!("{}", mat3);
     }
 }

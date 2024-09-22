@@ -1,5 +1,5 @@
 use std::fmt;
-use std::ops::{Index, IndexMut};
+use std::ops::{Add, Index, IndexMut, Mul, Sub};
 
 use super::vector::Vector;
 
@@ -138,6 +138,60 @@ impl<T> Matrix<T> {
 
     self[(row, col)] = value;
     Ok(())
+  }
+}
+
+impl<T> Matrix<T>
+where
+  T: Clone
+{
+  pub fn row(&self, index: usize) -> Option<Vector<T>> {
+    if index >= self.rows {
+      None
+    } else {
+      let start = index * self.cols;
+      let end = start + self.cols;
+      Some(Vector::from(self.data[start..end].to_vec()))
+    }
+  }
+
+  pub fn column(&self, index: usize) -> Option<Vector<T>> {
+    if index >= self.cols {
+      None
+    } else {
+      let column_data: Vec<T> = (0..self.rows)
+        .map(|row| self[(row, index)].clone())
+        .collect();
+      
+      Some(Vector::from(column_data))
+    }
+  }
+
+  pub fn transpose(&self) -> Self {
+    let mut transposed_data = Vec::with_capacity(self.rows * self.cols);
+    for col in 0..self.cols {
+      for row in 0..self.rows {
+        transposed_data.push(self[(row, col)].clone());
+      }
+    }
+
+    Self {
+      rows: self.cols,
+      cols: self.rows,
+      data: transposed_data
+    }
+  }
+
+  pub fn reshape(&self, new_rows: usize, new_cols: usize) -> Result<Self, String> {
+    if self.rows * self.cols != new_rows * new_cols {
+      return Err("Cannot reshape matrix".to_string());
+    }
+
+    Ok(Self {
+      rows: new_rows,
+      cols: new_cols,
+      data: self.data.clone()
+    })
   }
 }
 
