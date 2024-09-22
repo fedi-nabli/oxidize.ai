@@ -1,6 +1,7 @@
+use std::iter::FromIterator;
 use std::ops::{Add, AddAssign, Div, DivAssign, Index, IndexMut, Mul, MulAssign, Sub, SubAssign};
 
-#[derive(Clone)]
+#[derive(Clone, Debug, PartialEq)]
 pub struct Vector<T = f64> {
   pub data: Vec<T>
 }
@@ -16,7 +17,22 @@ impl<T> From<Vec<T>> for Vector<T> {
 impl<T> Vector<T> {
   pub fn new() -> Self {
     Self {
-      data: vec![]
+      data: Vec::new()
+    }
+  }
+
+  pub fn with_capacity(capacity: usize) -> Self {
+    Self {
+      data: Vec::with_capacity(capacity)
+    }
+  }
+
+  pub fn from_elem(elem: T, len: usize) -> Self
+  where
+    T: Clone
+  {
+    Self {
+      data: vec![elem; len]
     }
   }
 
@@ -109,6 +125,32 @@ impl<T> Vector<T> {
       Some(arr)
     } else {
       None
+    }
+  }
+
+  pub fn map<F, U>(&self, f: F) -> Vector<U>
+  where
+    F: Fn(&T) -> U
+  {
+    Vector {
+      data: self.data.iter().map(f).collect()
+    }
+  }
+
+  pub fn zip_map<F, U>(&self, other: &Self, f: F) -> Vector<U>
+  where
+    F: Fn(&T, &T) -> U
+  {
+    Vector {
+      data: self.data.iter().zip(other.data.iter()).map(|(a, b)| f(a, b)).collect()
+    }
+  }
+}
+
+impl<T> FromIterator<T> for Vector<T> {
+  fn from_iter<I: IntoIterator<Item = T>>(iter: I) -> Self {
+    Self {
+      data: iter.into_iter().collect()
     }
   }
 }
@@ -289,14 +331,12 @@ where
   T: Mul<Output = T> + Add<Output = T> + Copy + Default + PartialEq + From<f64> + Into<f64> + Div<Output = T>
 {
   pub fn normalize(&self) -> Self {
-    let length: f64 = self.dot(self).into();
-    let length = length.sqrt();
+    let length_squared: f64 = self.dot(self).into();
+    let length = length_squared.sqrt();
     if length > 0.0 {
       self.scalar_div(T::from(length))
     } else {
-      Self {
-        data: vec![T::default(); self.len()]
-      }
+      Self::from_elem(T::default(), self.len())
     }
   }
 }
@@ -312,5 +352,17 @@ impl<T> Index<usize> for Vector<T> {
 impl<T> IndexMut<usize> for Vector<T> {
   fn index_mut(&mut self, index: usize) -> &mut Self::Output {
     &mut self.data[index]
+  }
+}
+
+impl Vector<f32> {
+  pub fn l2_norm(&self) -> f32 {
+    self.dot(self).sqrt()
+  }
+}
+
+impl Vector<f64> {
+  pub fn l2_norm(&self) -> f64 {
+    self.dot(self).sqrt()
   }
 }
