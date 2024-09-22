@@ -1,6 +1,8 @@
 use std::fmt;
 use std::ops::{Index, IndexMut};
 
+use super::vector::Vector;
+
 #[derive(Clone, Debug)]
 pub struct Matrix<T = f64> {
   pub rows: usize,
@@ -37,6 +39,80 @@ impl<T> Matrix<T> {
       cols,
       data: vec![T::from(1); rows * cols]
     }
+  }
+
+  pub fn identity(size: usize) -> Self
+  where
+    T: Clone + From<i32> + Default
+  {
+    let mut matrix = Self::zeros(size, size);
+    for i in 0..size {
+      matrix[(i, i)] = T::from(1)
+    }
+
+    matrix
+  }
+
+  pub fn from_vec(rows: usize, cols: usize, data: Vec<T>) -> Result<Self, &'static str> {
+    if data.len() != rows * cols {
+      Err("Data length does not match specified dimensions.")
+    } else {
+      Ok(Self {
+        rows,
+        cols,
+        data
+      })
+    }
+  }
+
+  pub fn from_rows(rows: Vec<Vector<T>>) -> Result<Self, String> {
+    if rows.is_empty() {
+      return Err("Cannot create matrix from empty vector of rows".to_string());
+    }
+
+    let num_rows = rows.len();
+    let num_cols = rows[0].len();
+
+    if !rows.iter().all(|row| row.len() == num_cols) {
+      return Err("All rows must be the same length".to_string());
+    }
+
+    let data: Vec<T> = rows.into_iter().flat_map(|row| row.data).collect();
+
+    Ok(Self {
+      rows: num_rows,
+      cols: num_cols,
+      data
+    })
+  }
+
+  pub fn from_columns(cols: Vec<Vector<T>>) -> Result<Self, String>
+  where
+    T: Clone + Default
+  {
+    if cols.is_empty() {
+      return Err("Cannot create matrix from empty vector of columns".to_string());
+    }
+
+    let num_rows = cols[0].len();
+    let num_cols = cols.len();
+
+    if !cols.iter().all(|col| col.len() == num_rows) {
+      return Err("All columns must be the same length".to_string());
+    }
+
+    let mut data = vec![T::default(); num_rows * num_cols];
+    for (col_idx, column) in cols.into_iter().enumerate() {
+      for (row_idx, value) in column.data.into_iter().enumerate() {
+        data[row_idx * num_cols + col_idx] = value;
+      }
+    }
+
+    Ok(Self {
+      rows: num_rows,
+      cols: num_cols,
+      data
+    })
   }
 }
 

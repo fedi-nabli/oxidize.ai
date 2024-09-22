@@ -4,7 +4,7 @@ pub mod math;
 mod tests {
     use super::*;
 
-    use math::vector::Vector;
+    use math::{matrix::Matrix, vector::Vector};
 
     #[test]
     fn test_vector_add() {
@@ -75,5 +75,14 @@ mod tests {
         let vec = Vector::from(vec![1.0, 3.0, 3.1]);
         assert_eq!(vec.min().unwrap(), 1.0);
         assert_eq!(vec.max().unwrap(), 3.1);
+    }
+
+    #[test]
+    fn test_matrix() {
+        let mat: Matrix<f64> = Matrix::identity(3);
+        let v = Vector { data: vec![1.0, 2.1, 3.5, 4.6] };
+        let mat2: Matrix<f64> = Matrix::from_vec(2, 2, v.data).unwrap();
+        println!("{}", mat);
+        println!("{}", mat2);
     }
 }
