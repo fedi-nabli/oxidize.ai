@@ -114,6 +114,31 @@ impl<T> Matrix<T> {
       data
     })
   }
+
+  pub fn get(&self, row: usize, col: usize) -> Option<&T> {
+    if row >= self.rows || col >= self.rows {
+      return None;
+    }
+
+    Some(&self[(row, col)])
+  }
+
+  pub fn get_mut(&mut self, row: usize, col: usize) -> Option<&mut T> {
+    if row >= self.rows || col >= self.cols {
+      return None;
+    }
+
+    Some(&mut self[(row, col)])
+  }
+
+  pub fn set(&mut self, row: usize, col: usize, value: T) -> Result<(), String> {
+    if row >= self.rows || col >= self.cols {
+      return Err("Index out of bounds".to_string());
+    }
+
+    self[(row, col)] = value;
+    Ok(())
+  }
 }
 
 impl<T> Index<(usize, usize)> for Matrix<T> {
