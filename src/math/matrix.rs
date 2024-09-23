@@ -316,6 +316,18 @@ where
       .fold(T::default(), |acc, x| acc + x)
     )
   }
+
+  pub fn trace(&self) -> Result<T, String> {
+    if self.rows != self.cols {
+      return Err("Matrix must be square to computer inverse".to_string());
+    }
+
+    Ok(
+      (0..self.rows)
+        .map(|i| self[(i, i)])
+        .fold(T::default(), |acc, x| acc + x)
+    )
+  }
 }
 
 impl<T> Index<(usize, usize)> for Matrix<T> {
