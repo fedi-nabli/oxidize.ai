@@ -1,4 +1,4 @@
-use std::{default, fmt};
+use std::fmt;
 use std::ops::{Add, Index, IndexMut, Mul, Sub};
 
 use super::vector::Vector;
