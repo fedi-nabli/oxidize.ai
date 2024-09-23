@@ -274,6 +274,50 @@ where
   }
 }
 
+impl<T> Matrix<T>
+where
+  T: Copy + Add<Output = T> + Sub<Output = T> + Mul<Output = T> + Default
+{
+  pub fn hadamard_product(&self, other: &Self) -> Result<Self, String> {
+    if self.rows != other.rows || self.cols != other.cols {
+      return Err("Matrices must have the same dimensions for Hadamard product".to_string());
+    }
+
+    let new_data = self.data
+      .iter()
+      .zip(other.data.iter())
+      .map(|(a, b)| *a * *b)
+      .collect();
+
+    Ok(Self {
+      rows: self.rows,
+      cols: self.cols,
+      data: new_data
+    })
+  }
+
+  pub fn scalar_multiply(&self, scalar: T) -> Self {
+    Self {
+      rows: self.rows,
+      cols: self.cols,
+      data: self.data.iter().map(|&x| x * scalar).collect()
+    }
+  }
+
+  pub fn dot(&self, other: &Self) -> Result<T, String> {
+    if self.rows != other.rows || self.cols != other.cols {
+      return Err("Matrices must have the same dimensions for dot product".to_string());
+    }
+
+    Ok(self.data
+      .iter()
+      .zip(other.data.iter())
+      .map(|(a, b)| *a * *b)
+      .fold(T::default(), |acc, x| acc + x)
+    )
+  }
+}
+
 impl<T> Index<(usize, usize)> for Matrix<T> {
   type Output = T;
 
