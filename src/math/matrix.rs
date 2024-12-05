@@ -1,5 +1,5 @@
 use std::fmt;
-use std::ops::{Index, IndexMut};
+use std::ops::{Index, IndexMut, Add, Sub, Mul};
 
 #[derive(Clone)]
 pub struct Matrix<T = f64> {
@@ -74,6 +74,85 @@ impl<T> Matrix<T> {
 
     self[(row, col)] = value;
     Ok(())
+  }
+}
+
+impl<T> Add for Matrix<T>
+where
+  T: Add<Output = T> + Copy
+{
+  type Output = Result<Self, String>;
+
+  fn add(self, rhs: Self) -> Self::Output {
+    if self.rows != rhs.rows || self.cols != rhs.cols {
+      return Err("Cannot add 2 matrices with incompatible dimensions".to_string());
+    }
+
+    let new_data = self.data
+      .iter()
+      .zip(rhs.data.iter())
+      .map(|(a, b)| *a + *b)
+      .collect();
+
+    Ok(Self {
+      rows: self.rows,
+      cols: self.cols,
+      data: new_data
+    })
+  }
+}
+
+impl<T> Sub for Matrix<T>
+where
+  T: Sub<Output = T> + Copy
+{
+  type Output = Result<Self, String>;
+
+  fn sub(self, rhs: Self) -> Self::Output {
+    if self.rows != rhs.rows || self.cols != rhs.cols {
+      return Err("Cannot substract 2 matrices with incompatible matrices".to_string());
+    }
+
+    let new_data = self.data
+      .iter()
+      .zip(rhs.data.iter())
+      .map(|(a, b)| *a - *b)
+      .collect();
+
+    Ok(Self {
+      rows: self.rows,
+      cols: self.cols,
+      data: new_data
+    })
+  }
+}
+
+impl<T> Mul for Matrix<T>
+where
+  T: Mul<Output = T> + Add<Output = T> + Copy + Default
+{
+  type Output = Result<Self, String>;
+
+  fn mul(self, rhs: Self) -> Self::Output {
+    if self.cols != rhs.rows {
+      return Err("Cannot multiply matrices".to_string());
+    }
+
+    let mut new_data = vec![T::default(); self.rows * rhs.cols];
+
+    for i in 0..self.rows {
+      for j in 0..rhs.cols {
+        new_data[i * rhs.cols + j] = (0..self.cols)
+          .map(|k| self[(i, k)] * rhs[(k, j)])
+          .fold(T::default(), |acc, x| acc + x);
+      }
+    }
+
+    Ok(Self {
+      rows: self.rows,
+      cols: rhs.cols,
+      data: new_data
+    })
   }
 }
 

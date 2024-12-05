@@ -12,15 +12,10 @@ mod tests {
 
     #[test]
     fn matrix_test() {
-        let ones: Matrix<f64> = Matrix::ones(3, 3);
-        let zeros: Matrix<f64> = Matrix::zeroes(3, 3);
-        let mut id: Matrix<f64> = Matrix::identity(3);
-        println!("Ones matrix\n{}", ones);
-        println!("Zeroes matrix\n{}", zeros);
-        println!("Identity matrix\n{}", id);
-        println!("{:?}", id.get(1, 2));
-        id.set(1, 2, 3.5).unwrap();
-        println!("{:?}", id.get(1, 2));
+        let ones: Matrix<f64> = Matrix::ones(2, 3);
+        let id: Matrix<f64> = Matrix::identity(3);
+        let add = (ones * id).unwrap();
+        println!("{}", add);
     }
 
     #[test]
