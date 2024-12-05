@@ -1,4 +1,4 @@
-use std::ops::{Add, AddAssign, Div, DivAssign, Mul, MulAssign, Sub, SubAssign};
+use std::ops::{Add, AddAssign, Div, DivAssign, Index, IndexMut, Mul, MulAssign, Sub, SubAssign};
 
 #[derive(Clone, PartialEq)]
 pub struct Vector<T = f64> {
@@ -352,5 +352,19 @@ impl Vector<f32> {
 impl Vector<f64> {
   pub fn l2_norm(&self) -> f64 {
     self.dot(self).sqrt()
+  }
+}
+
+impl<T> Index<usize> for Vector<T> {
+  type Output = T;
+
+  fn index(&self, index: usize) -> &Self::Output {
+    &self.data[index]
+  }
+}
+
+impl<T> IndexMut<usize> for Vector<T> {
+  fn index_mut(&mut self, index: usize) -> &mut Self::Output {
+    &mut self.data[index]
   }
 }
