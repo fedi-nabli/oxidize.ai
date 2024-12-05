@@ -280,3 +280,77 @@ where
     }
   }
 }
+
+impl<T> Vector<T>
+where
+  T: Mul<Output = T> + Copy
+{
+  pub fn scalar_mul(&self, scalar: T) -> Self {
+    let data: Vec<_> = self
+      .data
+      .iter()
+      .map(|&x| x * scalar)
+      .collect();
+
+    Vector {
+      data
+    }
+  }
+}
+
+impl<T> Vector<T>
+where
+  T: Div<Output = T> + Copy
+{
+  pub fn scalar_div(&self, scalar: T) -> Self {
+    let data: Vec<_> = self
+      .data
+      .iter()
+      .map(|&x| x / scalar)
+      .collect();
+
+    Vector {
+      data
+    }
+  }
+}
+
+impl<T> Vector<T>
+where
+  T: Mul<Output = T> + Add<Output = T> + Default + Copy
+{
+  pub fn dot(&self, rhs: &Self) -> T {
+    self.data
+      .iter()
+      .zip(rhs.data.iter())
+      .map(|(a, b)| *a * *b)
+      .fold(T::default(), |acc, x| acc + x)
+  }
+}
+
+impl<T> Vector<T>
+where
+  T: Mul<Output = T> + Add<Output = T> + Div<Output = T> + Copy + Default + PartialEq + From<f64> + Into<f64>
+{
+  pub fn normalize(&self) -> Self {
+    let length_squared: f64 = self.dot(self).into();
+    let length = length_squared.sqrt();
+    if length > 0.0 {
+      self.scalar_div(T::from(length))
+    } else {
+      Self::from_elem(T::default(), self.len())
+    }
+  }
+}
+
+impl Vector<f32> {
+  pub fn l2_norm(&self) -> f32 {
+    self.dot(self).sqrt()
+  }
+}
+
+impl Vector<f64> {
+  pub fn l2_norm(&self) -> f64 {
+    self.dot(self).sqrt()
+  }
+}
