@@ -30,9 +30,10 @@ mod tests {
         println!("{}", add);
         let id2: Matrix<i32> = Matrix::identity(4);
         println!("{}", id2);
-        let m3 = id2.reshape(8, 2).unwrap();
-        println!("{}", m3);
-        println!("{}", id2.trace().unwrap());
+        println!("{}", m2.determinant().unwrap());
+
+        let m3: Matrix<i32> = Matrix::from_vec(3, 3, vec![1, 2, 3, 3, 2, 1, 4, 5, 6]).unwrap();
+        println!("{}", m3.determinant().unwrap());
     }
 
     #[test]

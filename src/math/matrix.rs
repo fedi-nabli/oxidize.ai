@@ -330,6 +330,47 @@ where
   }
 }
 
+impl<T> Matrix<T>
+where
+  T: Add<Output = T> + Sub<Output = T> + Mul<Output = T> + Copy + Default + PartialEq + std::fmt::Debug
+{
+  pub fn determinant(&self) -> Result<T, String> {
+    if self.rows != self.cols {
+      return Err("Matrix must be square to computer determinant".to_string());
+    }
+
+    let n = self.rows;
+    if n == 1 {
+      return Ok(self[(0, 0)]);
+    }
+
+    if n == 2 {
+      return Ok(self[(0, 0)] * self[(1, 1)] - self[(0, 1)] * self[(1, 0)]);
+    }
+
+    let mut det = T::default();
+    for j in 0..n {
+      let mut submatrix = Vec::with_capacity((n - 1) * (n -1));
+      for i in 1..n {
+        for k in 0..n {
+          if k != j {
+            submatrix.push(self[(i, k)]);
+          }
+        }
+      }
+
+      let subdet = Matrix { rows: n - 1, cols: n - 1, data: submatrix }.determinant()?;
+      if j % 2 == 0 {
+        det = det + self[(0, j)] * subdet;
+      } else {
+        det = det - self[(0, j)] * subdet;
+      }
+    }
+
+    Ok(det)
+  }
+}
+
 impl<T> Index<(usize, usize)> for Matrix<T> {
   type Output = T;
   
