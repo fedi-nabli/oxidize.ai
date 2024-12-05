@@ -9,6 +9,16 @@ mod tests {
     use super::*;
 
     use math::matrix::Matrix;
+    use math::vector::Vector;
+
+    #[test]
+    fn vactor_test() {
+        let mut v1 = Vector::from_elem(1, 10);
+        println!("{}", v1.to_string());
+        println!("{}", v1.len());
+        v1.set(3, 4).unwrap();
+        println!("{}", v1.to_string());
+    }
 
     #[test]
     fn matrix_test() {
