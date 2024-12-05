@@ -28,6 +28,11 @@ mod tests {
         let m2: Matrix<i32> = Matrix::from_vec(2, 2, vec![1, 2, 3, 4]).unwrap();
         println!("{}", m2);
         println!("{}", add);
+        let id2: Matrix<i32> = Matrix::identity(4);
+        println!("{}", id2);
+        let m3 = id2.reshape(8, 2).unwrap();
+        println!("{}", m3);
+        println!("{}", id2.trace().unwrap());
     }
 
     #[test]

@@ -5,6 +5,14 @@ pub struct Vector<T = f64> {
   pub data: Vec<T>
 }
 
+impl<T> From<Vec<T>> for Vector<T> {
+  fn from(data: Vec<T>) -> Self {
+    Self {
+      data
+    }
+  }
+}
+
 impl<T> Vector<T> {
   pub fn new() -> Self {
     Vector {

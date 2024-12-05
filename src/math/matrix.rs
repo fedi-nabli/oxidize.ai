@@ -1,6 +1,8 @@
 use std::fmt;
 use std::ops::{Index, IndexMut, Add, Sub, Mul};
 
+use super::vector::Vector;
+
 #[derive(Clone)]
 pub struct Matrix<T = f64> {
   pub rows: usize,
@@ -63,6 +65,56 @@ impl<T> Matrix<T> {
     })
   }
 
+  pub fn from_rows(rows: Vec<Vector<T>>) -> Result<Self, String> {
+    if rows.is_empty() {
+      return Err("Cannot create matrix from empty vector of rows".to_string());
+    }
+
+    let num_rows = rows.len();
+    let num_cols = rows[0].len();
+
+    if !rows.iter().all(|row| row.len() == num_cols) {
+      return Err("All rows must be the same length".to_string());
+    }
+
+    let data: Vec<T> = rows.into_iter().flat_map(|row| row.data).collect();
+
+    Ok(Self {
+      rows: num_rows,
+      cols: num_cols,
+      data
+    })
+  }
+
+  pub fn from_columns(cols: Vec<Vector<T>>) -> Result<Self, String>
+  where
+    T: Clone + Default
+  {
+    if cols.is_empty() {
+      return Err("Cannot create matrix from empty vector of colmuns".to_string());
+    }
+
+    let num_rows = cols[0].len();
+    let num_cols = cols.len();
+
+    if !cols.iter().all(|col| col.len() == num_rows) {
+      return Err("All columns must be the same length".to_string());
+    }
+
+    let mut data = vec![T::default(); num_rows * num_cols];
+    for (col_idx, column) in cols.into_iter().enumerate() {
+      for (row_idx, value) in column.data.into_iter().enumerate() {
+        data[row_idx * num_cols + col_idx] = value;
+      }
+    }
+
+    Ok(Self {
+      rows: num_rows,
+      cols: num_cols,
+      data
+    })
+  }
+
   pub fn get(&self, row: usize, col: usize) -> Option<&T> {
     if row >= self.rows || col >= self.cols {
       return None;
@@ -86,6 +138,60 @@ impl<T> Matrix<T> {
 
     self[(row, col)] = value;
     Ok(())
+  }
+}
+
+impl<T> Matrix<T>
+where
+  T: Clone
+{
+  pub fn row(&self, index: usize) -> Option<Vector<T>> {
+    if index >= self.rows {
+      None
+    } else {
+      let start = index * self.cols;
+      let end = start + self.cols;
+      Some(Vector::from(self.data[start..end].to_vec()))
+    }
+  }
+
+  pub fn column(&self, index: usize) -> Option<Vector<T>> {
+    if index >= self.cols {
+      None
+    } else {
+      let column_data: Vec<T> = (0..self.rows)
+        .map(|row| self[(row, index)].clone())
+        .collect();
+
+      Some(Vector::from(column_data))
+    }
+  }
+
+  pub fn transpose(&self) -> Self {
+    let mut transposed_data = Vec::with_capacity(self.rows * self.cols);
+    for col in 0..self.cols {
+      for row in 0..self.rows {
+        transposed_data.push(self[(row, col)].clone());
+      }
+    }
+
+    Matrix {
+      rows: self.cols,
+      cols: self.rows,
+      data: transposed_data
+    }
+  }
+
+  pub fn reshape(&self, new_rows: usize, new_cols: usize) -> Result<Self, String> {
+    if self.rows * self.cols != new_rows * new_cols {
+      return Err("Cannot reshape matrix".to_string());
+    }
+
+    Ok(Self {
+      rows: new_rows,
+      cols: new_cols,
+      data: self.data.clone()
+    })
   }
 }
 
@@ -165,6 +271,62 @@ where
       cols: rhs.cols,
       data: new_data
     })
+  }
+}
+
+impl<T> Matrix<T>
+where
+  T: Add<Output = T> + Sub<Output = T> + Mul<Output = T> + Copy + Default
+{
+  pub fn scalar_multiply(&self, scalar: T) -> Self {
+    Matrix {
+      rows: self.rows,
+      cols: self.cols,
+      data: self.data.iter().map(|&x| x * scalar).collect()
+    }
+  }
+
+  pub fn dot(&self, other: &Self) -> Result<T, String> {
+    if self.rows != other.rows || self.cols != other.cols {
+      return Err("Matrices must have the same dimensions for dot product".to_string());
+    }
+
+    Ok(self.data
+      .iter()
+      .zip(other.data.iter())
+      .map(|(a, b)| *a * *b)
+      .fold(T::default(), |acc, x| acc + x)
+    )
+  }
+
+  pub fn hadamard_product(&self, other: &Self) -> Result<Self, String> {
+    if self.rows != other.rows || self.cols != other.cols {
+      return Err("Matrices must have the same dimensions for Hadamard product".to_string());
+    }
+
+    let new_data = self.data
+      .iter()
+      .zip(other.data.iter())
+      .map(|(a, b)| *a * *b)
+      .collect();
+
+    Ok(Self {
+      rows: self.rows,
+      cols: self.cols,
+      data: new_data
+    })
+  }
+
+  pub fn trace(&self) -> Result<T, String> {
+    if self.rows != self.cols {
+      return Err("Matrix must be square to compute trace".to_string());
+    }
+
+    Ok(
+      (0..self.rows)
+        .map(|i| self[(i, i)])
+        .fold(T::default(), |acc, x| acc + x)
+    )
   }
 }
 
