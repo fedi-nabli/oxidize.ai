@@ -15,6 +15,8 @@ mod tests {
         let ones: Matrix<f64> = Matrix::ones(2, 3);
         let id: Matrix<f64> = Matrix::identity(3);
         let add = (ones * id).unwrap();
+        let m2: Matrix<i32> = Matrix::from_vec(2, 2, vec![1, 2, 3, 4]).unwrap();
+        println!("{}", m2);
         println!("{}", add);
     }
 

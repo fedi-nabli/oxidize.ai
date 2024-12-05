@@ -51,6 +51,18 @@ impl<T> Matrix<T> {
     matrix
   }
 
+  pub fn from_vec(rows: usize, cols: usize, data: Vec<T>) -> Result<Self, String> {
+    if data.len() != rows * cols {
+      return Err("Data length does not match specified dimensions.".to_string());
+    }
+
+    Ok(Self {
+      rows,
+      cols,
+      data
+    })
+  }
+
   pub fn get(&self, row: usize, col: usize) -> Option<&T> {
     if row >= self.rows || col >= self.cols {
       return None;
